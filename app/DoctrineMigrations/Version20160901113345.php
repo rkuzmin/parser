@@ -15,7 +15,8 @@ class Version20160901113345 extends AbstractMigration
      */
     public function up(Schema $schema)
     {
-
+        $this->addSql(file_get_contents(__DIR__ . '/../dump/hunkemoller_product.sql'));
+        $this->addSql(file_get_contents(__DIR__ . '/../dump/hunkemoller_product_image.sql'));
     }
 
     /**
@@ -23,7 +24,7 @@ class Version20160901113345 extends AbstractMigration
      */
     public function down(Schema $schema)
     {
-        // this down() migration is auto-generated, please modify it to your needs
-
+        $this->addSql('TRUNCATE TABLE product');
+        $this->addSql('TRUNCATE TABLE product_image');
     }
 }

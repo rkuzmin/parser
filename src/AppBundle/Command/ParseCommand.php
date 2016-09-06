@@ -73,8 +73,6 @@ class ParseCommand extends ContainerAwareCommand
                     } else {
                         echo 'Already added: ' . $productId . "\n";
                     }
-
-
                 } else {
                     echo 'ProductId=0; url=' . $url . "\n";
                 }
@@ -257,16 +255,16 @@ class ParseCommand extends ContainerAwareCommand
             for ($x = 0; $x <= 7; $x++) {
                 for ($j = 0; $j <=7; $j++) {
                     $path = $folder . trim(basename($image->getBigUrl()), '?v=0') . '_3_' . $x . '_' . $j . '.jpg';
-                    $fileUrl = 'https://17ce85a4f632d4aaaa0861aafda0ba70.lswcdn.net/tiles/' . $productId . '/' . trim(basename($image->getBigUrl()), '?v=0') . '/3f/' . $x . '/' . $j . '.jpg';
-                    if ($this->fileExists($fileUrl)) {
-                        $file = file_get_contents($fileUrl);
-
+                    $fileUrl = 'https://17ce85a4f632d4aaaa0861aafda0ba70.lswcdn.net/tiles/' . $productId . '/' . trim(basename($image->getBigUrl()), '?v=0') . '/3/' . $x . '/' . $j . '.jpg';
+                    $file = @file_get_contents($fileUrl);
+                    if ($file) {
                         $output->writeln('Downloading file: ' . $fileUrl);
                         $insert = file_put_contents($path, $file);
                         if (!$insert) {
                             throw new \Exception('Failed to write image: ' . $image->getBigUrl());
                         }
                     } else {
+                        $output->writeln('File does not exist: ' . $fileUrl);
                         $canMerge = false;
                     }
                 }
@@ -276,9 +274,6 @@ class ParseCommand extends ContainerAwareCommand
                 $this->imageMerge($productId);
             } else {
                 $output->writeln('Невозможно склеить тайлы');
-            }
-            if($i==1){
-                die;
             }
             $output->writeln('--------------------------------------------------------------------');
         }
@@ -303,9 +298,6 @@ class ParseCommand extends ContainerAwareCommand
                 $src = imagecreatefromjpeg($fileName);
                 $dstY = (7 - $i) * $imageSrcWidth;
                 $dstX = $j * $imageSrcHeight;
-                dump($dstX);
-                dump($dstY);
-                dump('--------');
                 imagecopy($dest, $src, $dstX, $dstY, 0, 0, $imageSrcWidth, $imageSrcHeight);
                 imagedestroy($src);
                 unlink($fileName);
@@ -313,25 +305,6 @@ class ParseCommand extends ContainerAwareCommand
         }
         imagejpeg($dest, $folder . $destFileName);
         imagedestroy($dest);
-    }
-
-    protected function fileExists($url)
-    {
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_NOBODY, true);
-        $result = curl_exec($curl);
-        var_dump($result);die;
-        $ret = false;
-
-        if ($result !== false) {
-            $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            if ($statusCode == 200) {
-                $ret = true;
-            }
-        }
-        curl_close($curl);
-
-        return $ret;
     }
 
 }
